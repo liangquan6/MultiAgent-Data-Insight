@@ -36,9 +36,29 @@ def profile_dataset(path: str) -> str:
 # 默认图存这里; LLM 不传 save_dir 也兜得住 (os 在文件头已 import)
 PLOT_DIR = os.path.join("results", "plots")
 
+# 图片后缀: LLM 常误把"想要的文件名"塞进 save_dir (如 results/plots/sepal_scatter.png),
+# 若不拦, os.makedirs 会把 sepal_scatter.png 当目录建, 真图存进 sepal_scatter.png/plot_xxx.png,
+# 路径变成 xxx.png\plot_xxx.png, Reviewer 反复拦"非法路径"却改不掉 → 返工循环吃满消息预算。
+# (W5 追踪到的真实 bug, 直接导致 W4 完成率低)
+_IMG_SUFFIXES = (".png", ".jpg", ".jpeg", ".svg", ".pdf")
+
 
 def _ensure_dir(save_dir: str) -> str:
-    os.makedirs(save_dir, exist_ok=True)
+    """确保 save_dir 是个目录, 返回目录路径。
+
+    防 LLM 误传文件路径: 若 save_dir 以图片后缀结尾 (如 sepal_scatter.png),
+    剥离后缀取其父目录, 而不是把 .png 当目录建 (否则产生 xxx.png/ 伪目录 +
+    路径污染成 xxx.png\\plot_xxx.png, 触发 Reviewer 返工循环)。
+    空串兜底回 PLOT_DIR。
+    """
+    if not save_dir:
+        save_dir = PLOT_DIR
+    low = save_dir.lower()
+    if low.endswith(_IMG_SUFFIXES):
+        # 剥掉文件名, 取所在目录 (results/plots/sepal_scatter.png → results/plots)
+        save_dir = os.path.dirname(save_dir)
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
     return save_dir
 
 

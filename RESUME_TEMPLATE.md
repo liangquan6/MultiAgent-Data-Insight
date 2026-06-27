@@ -20,7 +20,10 @@
 5. 设计 SchemaMemory 压缩 DataFrame 元信息 + 对话历史滚动摘要 + jsonl 持久化续聊; 对照实验测得单轮 prompt token 下降 16.5% (宽表 50 列, verbose 16.5%→compact)
 6. 搭建 Agent 行为评测 (完成率/循环检测/token 效率/工具误用率), 4 数据集 × 3 模式 12 次跑批: RoundRobin 完成率 25%/零循环/最快、确定性 Selector 工具误用最低 3.3%、LLM 自调度循环率 75% 最费 token; 评估后排除 MagenticOne (固定 5-agent 网页浏览导向, 场景错配) 改用模型自调度做对照, 据此选定确定性调度为主
 
-**成果**: 4 数据集 12 次跑批 data 已落 `results/benchmark.json`; 实测发现并量化"消息上限与返工循环矛盾"——无模式能稳定在消息上限内完成 (仅 trends×RoundRobin 一次出真报告), 主因是 Analyst→Coder→Reviewer 返工吃满 MaxMessage、报告员错过收尾窗口。项目博客 + 对比表见 README。
+**成果**: 4 数据集 12 次跑批 data 已落 `results/benchmark.json`; 实测发现并量化"消息上限与返工循环矛盾"——无模式能稳定在消息上限内完成 (仅 trends×RoundRobin 一次出真报告), 主因是 Analyst→Coder→Reviewer 返工吃满 MaxMessage、报告员错过收尾窗口。
+**W5 定位并修复两个返工死锁源** (从"发现问题"到"定位根因"闭环):
+① 路径污染 bug — LLM 把"想要的图名"塞进 save_dir, 沙箱 _ensure_dir 把 `.png` 当目录建, 真图存进 `xxx.png/plot_xxx.png`, Reviewer 反复拦"非法路径"但 Coder 改不掉 (它传的参数本就是这格式)。修: _ensure_dir 检测图片后缀剥离成父目录 + 单测覆盖。实测 token -54%/轮 46→31/耗时 -46%。
+② Reviewer 不可达子任务判定 — Analyst 提建派生列 (如 petal_ratio=a/b) 但工具集无 add_column, Reviewer 不知工具边界一味要求返工, Coder 反复试报错的工具"装作干活", 双方卡死。修: Reviewer system_message 显式列工具清单 + 加"能力外子任务判定为不可达并跳过"规则, 配套让 Coder 诚实报告边界。实测不再兜底/轮 46→9/token 142k→12.7k (-91%)/耗时 152s→46s/图 62→5 (去重)。两修复均在 prompt/工具层, 不碰沙箱安全。项目博客 + 对比表见 README。
 选用 AutoGen 而非 LangGraph 的判断: 业务需要多角色串行协作 + 终止协议, AutoGen 内置 GroupChat 抽象直接契合; 评估 MagenticOne 后因其为网页浏览导向、强依赖 playwright 而排除。
 
 ---

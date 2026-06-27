@@ -93,6 +93,13 @@
   - llm_selector(模型自调度): 完成率 0% / 循环 75% / 63 轮 / 394k token / 263s / 误用 15%
   - 核心结论: LLM 自调度循环率 75%, 证实 W2 改用确定性调度的必要性;
     确定性状态机工具误用最低; 无模式能可靠在消息上限内完成(返工循环吃满 MaxMessage)。
+  - 注: 上述数字是**修复前基线** (results/benchmark.json 保持不动作对照)。
+    W5 修了两个返工死锁源后, iris selector 单跑实测改善显著:
+    ① 路径污染 bug (_ensure_dir 把 .png 当目录建, 修: 剥离图片后缀) — token -54%/轮 46→31/耗时 -46%;
+    ② Reviewer 不可达子任务判定 (Analyst 提建派生列但工具集无 add_column, Reviewer 不知道
+       工具边界一味要求返工。修: Reviewer system_message 显式列工具清单+加"不可达子任务跳过"规则) —
+       不再兜底/轮 46→9/token 142k→12.7k (-91%)/耗时 152s→46s/图 62→5 (去重)。
+    两个修复都在 prompt/工具层, 不碰沙箱安全。benchmark 重跑留作可选 TODO。
 
 ## W5  业务绑定 + 对外发布
 

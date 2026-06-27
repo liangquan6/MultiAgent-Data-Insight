@@ -180,9 +180,21 @@ Reviewer 反复拦"非法路径"让 Coder 改, 但 Coder 改不掉 (它传的 sa
 证明返工循环里有相当一部分是这个路径污染 bug 造成的。
 
 12 次只完成 1 次 (trends×round_robin) 是真实痛点, 不全是 bug —— 还有消息预算 vs
-调度策略的根本矛盾。修了这个 bug 后完成率应改善, 但 80→100 分仍需解决动态 MaxMessage
-或提前触发 Reporter 的策略。
-(锚点: tools/data_tools.py 的 _ensure_dir, main.py 的 _reporter_fallback)
+调度策略的根本矛盾。修了路径污染 bug 后完成率应改善, 但仍有一个死锁源没解决。
+
+**W5 追踪到第二个死锁源并修复 (Reviewer 不可达子任务判定)**: 路径污染修好后,
+iris 仍触发兜底 (46 轮耗尽)。复盘日志发现新死锁链: Analyst 提了"算 petal_ratio
+(=petal_len/petal_wid) 的比值"这条子任务, 但 Coder 可用工具只有 6 个可视化/检测工具,
+**没有 add_column 或自定义代码执行**, 做不到建派生列。Coder 反复试报错的 groupby_aggregate
+(列不存在) "装作在干活", Reviewer 坚持"子任务没完成必须做", 双方卡死吃满消息预算。
+根因不是 bug, 是 **Reviewer 不知道工具边界, 无法判定某子任务根本做不到**, 只会一味要求返工。
+修法 (方案 A): Reviewer 的 system_message 显式列出 6 个工具清单 + 能力边界
+(无 add_column/无任意代码执行), 加规则——"某子任务所需列或运算不在工具能力内且 Coder 已
+报告做不到时, 判定该子任务**当前工具不可达**, 予以跳过不再要求返工"; 配套让 Coder 在能力外
+任务上明确报告"不可达"而非硬试报错工具。这是 prompt 层改动, 不碰沙箱安全。
+**修复后实测同数据集**: 不再兜底 (Reporter 第 9 轮直接出真报告), token 142k→12.7k (-91%),
+轮数 46→9 (-80%), 耗时 152s→46s (-70%), 图数 62→5 (去重)。报告引用的 4 个图路径全部真实存在。
+(锚点: agents/reviewer_agent.py 的 system_message, agents/coder_agent.py 第 4 条准则)
 
 ### 14. 沙箱超时 / OOM 怎么处理?
 

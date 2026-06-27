@@ -1,0 +1,6 @@
+[
+  {"name": "iris",       "path": "data/iris.csv",       "task": "对鸢尾花数据集做分类相关特征分析, 找出最有区分力的特征。"},
+  {"name": "wide_synth", "path": "data/wide_synth.csv", "task": "宽表数据(50 数值列+1 类别), 找组间差异最大的特征与高相关列对。"},
+  {"name": "trends",     "path": "data/trends.csv",     "task": "时序数据, 分析趋势、周期性、不同渠道的 visits 差异。"},
+  {"name": "mixed",      "path": "data/mixed.csv",      "task": "混合类型数据, 分析收入/评分分布、城市差异, 处理缺失值。"}
+]

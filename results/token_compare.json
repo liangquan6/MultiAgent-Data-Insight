@@ -1,0 +1,31 @@
+{
+  "dataset": "wide_synth (50 num cols + 1 category, 200 rows)",
+  "mode": "selector",
+  "schema_cap": 20000,
+  "verbose": {
+    "data": "data/wide_synth_v.csv",
+    "mode": "selector",
+    "schema_mode": "verbose",
+    "prompt_tokens": 878114,
+    "completion_tokens": 9860,
+    "total_tokens": 887974,
+    "rounds": 46,
+    "elapsed_sec": 259.9,
+    "n_plots": 14,
+    "report_path": "results/wide_synth_v_report.md"
+  },
+  "compact": {
+    "data": "data/wide_synth_c.csv",
+    "mode": "selector",
+    "schema_mode": "compact",
+    "prompt_tokens": 733326,
+    "completion_tokens": 22391,
+    "total_tokens": 755717,
+    "rounds": 46,
+    "elapsed_sec": 474.2,
+    "n_plots": 334,
+    "report_path": "results/wide_synth_c_report.md"
+  },
+  "savings_pct": 14.9,
+  "conclusion": "compact 比 verbose 省 14.9% token (887974 -> 755717), SchemaMemory 压缩有效"
+}

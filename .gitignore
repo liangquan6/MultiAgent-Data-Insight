@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 环境/秘钥
+.env
+*.key
+
+# conda
+.conda/
+
+# 结果: 保留 benchmark/报告 (面试官要看), 忽略对话历史/图/调试日志
+# jsonl = Agent 对话历史, 体积大且无展示价值, 不进仓库
+results/*.jsonl
+# plots = 29 张运行产物图, 可由 main.py 重新生成, 不进仓库
+results/plots/
+# 临时调试日志 (开发时 stdout/stderr 重定向产物)
+results/*run*.log
+results/run_log*.txt
+results/stdout.txt
+results/stderr.txt
+# benchmark.json / token_compare.json / *_report.md 保留 (README 引用 + 简历背书)
+
+# 数据集: 合成集小且面试官 clone 后要能跑, 保留
+# (若以后接入真实爬虫数据含隐私, 再单独 ignore 那个文件)
+# 但 token 对照实验的临时副本 (wide_synth_v/c.csv) 不进, 可由 make_datasets.py 重生成
+data/wide_synth_[vc].csv
+
+# docs 下的运行日志 (开发时 tee 录的, 无展示价值)
+docs/*.log
+
+# 系统/编辑器垃圾
+*.stackdump
+nul
+
+# IDE
+.vscode/
+.idea/
+*.log

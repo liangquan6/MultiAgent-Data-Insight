@@ -32,6 +32,11 @@ data/wide_synth_[vc].csv
 # docs 下的运行日志 (开发时 tee 录的, 无展示价值)
 docs/*.log
 
+# 面试底稿: 私人准备材料, 不公开 (本地保留, 不进仓库)
+# INTERVIEW_PREP = 20题问答底稿, RESUME_TEMPLATE = 简历项目段+追问准备
+docs/INTERVIEW_PREP.md
+RESUME_TEMPLATE.md
+
 # 系统/编辑器垃圾
 *.stackdump
 nul
